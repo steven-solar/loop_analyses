@@ -11,12 +11,13 @@ For each anchor, apply rules:
 		- H2Aub **and** Ring1b
 	- save the underlying results of each thing (ie. is_k4me1 and is_k27ac) so we can see at the end too
     - experimented w narrow vs broad peaks for PRC, felt narrow were more reliable and better overlapped expected loci, gave more reasonable #s, so went with that
+    - also experimented w diff -log(p) cutoffs, and felt 10 was most reasonable
+    - and at this point, viewed different loop window and FDR threshold values, feel that 3kb windows and FDR<0.01 is what I'll move fwd with
 '''
 
 # conda activate pybedtools_env
 import pandas as pd
 import pybedtools #v0.12.0
-import sys
 
 NARROW_FOLDER='/mnt/florenceshares/Masahiro/Saitoulab_data/saitoulab_chip/peaks/macs2/narrow'
 BROAD_FOLDER='/mnt/florenceshares/Masahiro/Saitoulab_data/saitoulab_chip/peaks/macs2/broad'
@@ -39,7 +40,6 @@ def get_centered_bt(df, window_name):
         'anchor_id': df['anchor_id'],
     })
     
-    # Convert to BedTool
     return pybedtools.BedTool.from_dataframe(temp_df)
 
 def annotate_anchors(df, signals, window_name):
