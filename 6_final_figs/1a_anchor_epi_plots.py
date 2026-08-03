@@ -34,7 +34,8 @@ MERGE_COLS = ['anchor_id', 'chrom', 'mid', 'cell_line', 'window']
 OUT_DIR='anchor_deeptools/'
 
 # clusters = pd.read_csv('../3_anchor_clustering/clustering/anchors_3kb_labeled.tsv', sep='\t')
-clusters = pd.read_csv('../3_anchor_clustering/clustering_subcluster_c6/anchors_reclustered.tsv', sep='\t')
+# clusters = pd.read_csv('../3_anchor_clustering/clustering_subcluster_c6/anchors_reclustered.tsv', sep='\t')
+clusters = pd.read_csv('../3_anchor_clustering/clustering_recluster_per_cellline/anchors_reclustered_per_cl.tsv', sep='\t')
 
 annotation = pd.read_csv('../2_epigenomics/anchor_epigenomics/anchors_q0.01_3kb_annotated.p10.tsv', sep='\t')
 annotation = annotation[MERGE_COLS + [c for c in annotation.columns if c.startswith('is_')]]

@@ -27,7 +27,6 @@ def attach_cluster_metadata(anchor_df, cluster_meta_path):
     anchor_df = anchor_df.copy()
     anchor_df['cluster'] = anchor_df['cluster'].astype(int)
 
-    # drop any of these cols if they already exist to avoid _x/_y suffixes on re-run
     cols_to_drop = [c for c in meta_cols[1:] if c in anchor_df.columns]
     if cols_to_drop:
         anchor_df = anchor_df.drop(columns=cols_to_drop)

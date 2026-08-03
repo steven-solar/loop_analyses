@@ -7,8 +7,8 @@ matplotlib.rcParams.update({
     'xtick.labelsize': 6,
     'ytick.labelsize': 6,
     'legend.fontsize': 6,
-    'svg.fonttype':  'none',       # keeps text as real text, not outlines, in Illustrator
-    'pdf.fonttype':  42,       # keeps text as real text, not outlines, in Illustrator
+    'svg.fonttype':  'none',
+    'pdf.fonttype':  42,
 })
 
 import matplotlib.pyplot as plt
@@ -19,15 +19,12 @@ import pandas as pd
 df = pd.read_csv('../3_anchor_clustering/clustering/anchors_3kb_labeled.tsv', sep='\t')
 
 def style_axes(ax):
-    # Axis stroke width = 0.25 pt
     for spine in ax.spines.values():
         spine.set_linewidth(0.25)
     ax.tick_params(width=0.25, length=2)
     sns.despine(ax=ax)
 
-########################
-# 1) By cluster
-########################
+# By cluster
 fig, ax = plt.subplots(figsize=(10, 8))
 
 cluster_color_map = (
@@ -71,9 +68,7 @@ style_axes(ax)
 plt.savefig('anchor_umap/anchor_umap_by_cluster.pdf')
 
 
-########################
-# 2) By category
-########################
+# By category
 fig, ax = plt.subplots(figsize=(10, 8))
 
 category_color_map = (
@@ -117,9 +112,7 @@ style_axes(ax)
 plt.savefig('anchor_umap/anchor_umap_by_category.pdf')
 
 
-########################
-# 3) By cell line
-########################
+# By cell line
 cl_color_df = pd.read_csv('../data/cl_colors.tsv', sep='\t')
 cl_colormap = dict(zip(cl_color_df['cell_line'], cl_color_df['color']))
 print(cl_colormap)

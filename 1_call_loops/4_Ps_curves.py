@@ -70,58 +70,102 @@ def plot_Ps_curves_together(cell_lines, colors, clr_path, tag):
     fig_ps, ax_ps = plt.subplots(figsize=(10, 7))
     fig_der, ax_der = plt.subplots(figsize=(10, 7))
 
+    # To store peak info if you also want to use it later
+    peak_positions = {}   # cell_line -> (peak_x, peak_y)
+
     for cell_line in cell_lines:
-        clr = cooler.Cooler(clr_path.format(cell_line=cell_line, RES=RES))
-        out_path = out_path.format(cell_line=cell_line, RES=RES, OUT_DIR=OUT_DIR)
-        tag = out_path.split('.')[-1]
+        # clr = cooler.Cooler(clr_path.format(cell_line=cell_line, RES=RES))
+        # out_path = out_path.format(cell_line=cell_line, RES=RES, OUT_DIR=OUT_DIR)
+        # tag = out_path.split('.')[-1]
 
-        calculate_and_save_avg_Ps_curve(clr, nproc=50, max_sep=3000000, output_Ps_filename=f'{OUT_DIR}/P_s_{cell_line}_{RES}bp.{tag}.txt', output_der_filename=f'{OUT_DIR}/P_s_der_{cell_line}_{RES}bp.{tag}.txt')
-        P_s_curve = np.loadtxt(f'{OUT_DIR}/P_s_{cell_line}_{RES}bp.{tag}.txt')
-        x_coords = np.arange(1, len(P_s_curve) + 1) * RES
-        ax_ps.loglog(x_coords, P_s_curve, label=cell_line, color=colors[cell_line], linewidth=2.5, alpha=0.8)
+        # calculate_and_save_avg_Ps_curve(
+        #     clr, nproc=50, max_sep=3000000,
+        #     output_Ps_filename=f'{OUT_DIR}/P_s_{cell_line}_{RES}bp.{tag}.txt',
+        #     output_der_filename=f'{OUT_DIR}/P_s_der_{cell_line}_{RES}bp.{tag}.txt'
+        # )
 
-        # Plot P'(s) using np.gradient on log-log data
-        P_s_derivative = np.loadtxt(f'{OUT_DIR}/P_s_der_{cell_line}_{RES}bp.{tag}.txt')    
-        x_coords = np.arange(1, len(P_s_derivative) + 1) * RES
+        # --- P(s) ---
+        P_s_curve = np.loadtxt(f'{OUT_DIR}/P_s_{cell_line}_{RES}bp.txt')
+        x_coords_ps = np.arange(1, len(P_s_curve) + 1) * RES
+        ax_ps.loglog(
+            x_coords_ps,
+            P_s_curve,
+            label=cell_line,
+            color=colors[cell_line],
+            linewidth=2.5,
+            alpha=0.8
+        )
 
-        mask = (P_s_derivative < 0) # & (x_coords > 10000)  # Focus on negative derivatives in the range of interest
-        x_coords = x_coords[mask]
+        # --- P'(s) ---
+        P_s_derivative = np.loadtxt(f'{OUT_DIR}/P_s_der_{cell_line}_{RES}bp.txt')
+        x_coords_der = np.arange(1, len(P_s_derivative) + 1) * RES
+
+        # keep only where derivative is negative (as in your existing code)
+        mask = (P_s_derivative < 0)
+        x_coords_der = x_coords_der[mask]
         P_s_derivative = P_s_derivative[mask]
 
+        if len(P_s_derivative) == 0:
+            continue  # skip if nothing passes the mask
+
+        # peak in this masked region
         peak_idx = np.argmax(P_s_derivative)
-        peak_x = x_coords[peak_idx]
-        ax_der.semilogx(x_coords, P_s_derivative, color=colors[cell_line], linewidth=2.5, alpha=0.8)
-        if peak_x is not None:
-            ax_der.axvline(x=peak_x, color=colors[cell_line], linestyle='--', alpha=0.6)
-    
+        peak_x = x_coords_der[peak_idx]
+        peak_y = P_s_derivative[peak_idx]
+        peak_positions[cell_line] = (peak_x, peak_y)
+
+        ax_der.semilogx(
+            x_coords_der,
+            P_s_derivative,
+            color=colors[cell_line],
+            linewidth=2.5,
+            alpha=0.8,
+            label=cell_line  # this will be used for the legend
+        )
+
+        # vertical line at the peak
+        ax_der.axvline(x=peak_x, color=colors[cell_line], linestyle='--', alpha=0.6)
+
+        # text marking the peak of each cell line
+        # slight offset in y to avoid overlapping the line
+        ax_der.text(
+            peak_x,
+            peak_y * 1.05,  # small vertical offset
+            f'{cell_line}\n{int(peak_x):,} bp',
+            color=colors[cell_line],
+            fontsize=9,
+            ha='center',
+            va='bottom'
+        )
+
+    # --- Finalize P(s) figure (color legend is already correct via label/color) ---
     ax_ps.set_xlabel('Distance (bp)', fontsize=12)
     ax_ps.set_ylabel('P(s) HiC', fontsize=12)
     ax_ps.set_title('P(s) HiC', fontsize=14)
-    ax_ps.legend()
+    ax_ps.legend(title='Cell line')
     ax_ps.grid(True, which="both", ls="-", alpha=0.2)
     fig_ps.tight_layout()
-    fig_der.savefig(f'{OUT_DIR}/Combined_Ps.{tag}.svg', format='svg')
+    fig_ps.savefig(f'{OUT_DIR}/Combined_Ps.{tag}.svg', format='svg')
 
-    # --- Finalize P'(s) Figure ---
+    # --- Finalize P'(s) figure ---
     ax_der.set_xlabel('Distance (bp)', fontsize=12)
     ax_der.set_ylabel("P'(s) HiC [d(logP)/d(logS)]", fontsize=12)
     ax_der.set_title("P'(s) HiC", fontsize=14)
-    ax_der.legend()
-    ax_der.legend(loc='best', frameon=True)
+    ax_der.legend(title='Cell line', loc='best', frameon=True)
     ax_der.grid(True, which="both", ls="-", alpha=0.2)
     fig_der.tight_layout()
     fig_der.savefig(f'{OUT_DIR}/Combined_Derivative.{tag}.svg', format='svg')
-
+    
 def read_colors(tsv):
     """Read colors from a TSV file with columns 'cell_line' and 'color'."""
     df = pd.read_csv(tsv, sep='\t')
     return dict(zip(df['cell_line'], df['color']))
 
 cell_lines = ['ESC', 'EpiLC', 'd4c7PGCLC', 'GSC']
-colors = read_colors('../data/colors.tsv')
+colors = read_colors('../data/cl_colors.tsv')
 coolers = {}
 P_s_curves = {}
-plot_Ps_curves_together(cell_lines, colors, clr_path='/mnt/coldstorage/shares/Masahiro/microc/mcs/{cell_line}_WT_HiC_900M.mcool::/resolutions/{RES}', tag='HiC_900M')
+# plot_Ps_curves_together(cell_lines, colors, clr_path='/mnt/coldstorage/shares/Masahiro/microc/mcs/{cell_line}_WT_HiC_900M.mcool::/resolutions/{RES}', tag='HiC_900M')
 
 cell_lines += ['merged']
 colors['merged'] = '#000000'

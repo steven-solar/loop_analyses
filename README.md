@@ -1,2 +1,45 @@
 # loop_analyses
 Code for manuscript on anchor clustering, loop strength prediction
+
+- Merge the 4 micro-C maps into one using `cooler merge`
+- Call loops on this merged micro-C map using `cooler`, call at a permissive strength/FDR (n=?)
+-  Filter loops by James criteria (on the merge still, n=?)
+	- >= 32kb
+	- No NaNs
+	- Sufficient read counts
+	- Loop is a local maxima (check that this looks true again)
+- Now, call AbLE per cell line (non-NaN, n=?)
+	- If fails or neg or 0 = NaN
+- Now I have 4 sets of loops (one per cell line)
+	- chr1, s1, e1, chr2, s2, e2, mid1, mid2, cell_line, AbLE
+- Extract anchors
+	- chr, mid, 1or2, cell_line
+- For all anchors, extract features (epigenomics in 5kb window centered on loop)
+	- Input normalize each epigenomic feature, minus ATAC
+	- ATAC
+- For all anchors, calculate z-score and decile of each feature
+- For each anchor, apply rules:
+	- Is CTCF 
+		- CTCF: CTCF (narrow) **and** Rad21 (narrow)
+	- Is E
+		- K4me1 (narrow) **or** K27ac (broad)
+	- Is P
+		- TSS
+	- CRE = E **or** P
+	- Is PRC
+		- H2Aub **and** Ring1b
+- Put all the anchors into a long df with cols:
+	- chr, mid, 1or2, cell_line, feats
+- Clustering:
+	- perform PCA on the anchors
+	- take 4 components
+	- perform KNN clustering
+	- view heatmap
+	- view UMAP
+	- Condense clusters, new heatmap
+- Now merge across cell lines to calculate distance of loops
+- Merge anchors to loops
+	- chr1, s1, e1, chr2, s2, e2, mid1, mid2, size, cell_line, a1_feats, a2_feats, AbLE
+- Strength prediction: 
+	- Residualize out importance of size
+	- perform PLS on the loops, take 4 components

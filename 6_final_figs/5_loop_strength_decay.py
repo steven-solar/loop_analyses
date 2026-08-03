@@ -19,7 +19,8 @@ import math
 
 CELL_LINES = ['ESC', 'EpiLC', 'd4c7PGCLC', 'GSC']
 
-LOOP_DF_PATH = '../4_loop_strength_prediction/loops/loop_df_3kb_wide.tsv'
+# LOOP_DF_PATH = '../4_loop_strength_prediction/loops/loop_df_3kb_wide.tsv'
+LOOP_DF_PATH = '../4_loop_strength_prediction/loops/loop_df_reclustered_per_cl_wide.tsv'
 
 PER_CELL_LINE_LOOP_NAME = True
 LOOP_NAME_COL_TEMPLATE  = 'loop_name_{cl}'
@@ -56,7 +57,7 @@ GAP_BREAK_FACTOR = 4
 HARMONIZE_BINS  = True
 HARMONIZE_STRAT = 'all'   # 'all' | 'largest' | 'smallest'
 
-PLOT_CATEGORIES = ['CTCF-CTCF', 'CRE-CRE', 'PRC-related'] #, 'Weak-related', 'Other-related']
+PLOT_CATEGORIES = ['CTCF-CTCF', 'CRE-CRE', 'PRC-PRC'] #, 'Weak-related', 'Other-related']
 # PLOT_CATEGORIES = None    # ← uncomment for ALL classes, no merging
 PRC_RELATED_SOURCES = {'PRC-PRC', 'CRE-PRC', 'CTCF-PRC', 'PRC-CRE', 'PRC-CTCF'}
 
@@ -344,13 +345,18 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
                  out_tag, title_tag,
                  harmonize=HARMONIZE_BINS,
                  harmonize_strat=HARMONIZE_STRAT,
-                 plot_cats=PLOT_CATEGORIES):
+                 plot_cats=PLOT_CATEGORIES,
+                 shared_scale=True):
     """
     One subplot per cell line; one coloured line per loop class.
     plot_cats
     ---------
     PLOT_CATEGORIES  → simplified view  (PRC-related merged, others filtered)
     None             → all raw classes, no merging
+
+    shared_scale : bool
+        If True, all 4 cell-line panels use the same x/y axis limits,
+        derived from the min/max across ALL panels/classes in this figure.
     """
     classes = resolve_classes(all_classes, plot_cats, df, name_col_fn)
     if not classes:
@@ -359,10 +365,13 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
 
     for log_x, log_y, tag in SCALE_COMBOS:
         nrows, ncols = grid_dims(len(CELL_LINES), max_cols=2)
-        LETTER_SIZE = (8.5, 11)
+        LETTER_SIZE = (12, 10)
         fig, axes = plt.subplots(nrows, ncols, figsize=LETTER_SIZE,
                                   sharex=False, sharey=False)
         axes = np.atleast_1d(axes).flatten()
+
+        # Track global data range across all panels for this scale combo
+        all_x, all_y_lo, all_y_hi = [], [], []
 
         for ax, cl in zip(axes, CELL_LINES):
             able_col = ABLE_COL_TEMPLATE.format(cl=cl)
@@ -371,7 +380,6 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
                 ax.set_visible(False)
                 continue
 
-            # One shared set of bin edges for all classes in this panel
             shared_edges = (
                 compute_shared_edges(df, classes, name_col, 'size',
                                      N_BINS, BIN_STRATEGY, MIN_N, harmonize_strat)
@@ -389,7 +397,6 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
                 if len(centers) == 0:
                     continue
 
-                # Gap detection in the same space as the axis scale
                 centers, means, sems = insert_gaps(
                     centers, means, sems, GAP_BREAK_FACTOR, log_x=log_x)
 
@@ -397,8 +404,15 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
                 ax.plot(centers, means, 'o-', color=color, linewidth=1.2,
                         markersize=3, alpha=0.85, label=cls)
                 safe_fill(ax, centers, means, sems, color)
-                if log_x and log_y:
-                    add_powerlaw_fit(ax, centers, means, color, label_prefix=cls)
+                # if log_x and log_y:
+                #     add_powerlaw_fit(ax, centers, means, color, label_prefix=cls)
+
+                if shared_scale:
+                    valid = ~np.isnan(means)
+                    if valid.any():
+                        all_x.extend(centers[valid])
+                        all_y_lo.extend((means - sems)[valid])
+                        all_y_hi.extend((means + sems)[valid])
 
             ax.set_title(cl, fontsize=13, fontweight='bold')
             style_ax(ax, log_x, log_y)
@@ -406,20 +420,46 @@ def plot_layout1(df, all_classes, class_colors, name_col_fn,
         for ax in axes[len(CELL_LINES):]:
             ax.set_visible(False)
 
+        # Apply one common x/y range to every visible panel
+        if shared_scale and all_x:
+            x_arr = np.asarray(all_x, dtype=float)
+            y_lo_arr = np.asarray(all_y_lo, dtype=float)
+            y_hi_arr = np.asarray(all_y_hi, dtype=float)
+
+            if log_x:
+                xmin = max(x_arr.min(), 1)
+                xmax = x_arr.max()
+                xlim = (xmin / 1.15, xmax * 1.15)
+            else:
+                pad = 0.05 * (x_arr.max() - x_arr.min() or 1)
+                xlim = (x_arr.min() - pad, x_arr.max() + pad)
+
+            if log_y:
+                ymin = max(y_lo_arr[y_lo_arr > 0].min() if (y_lo_arr > 0).any() else y_hi_arr.min(), 1e-10)
+                ymax = y_hi_arr.max()
+                ylim = (ymin / 1.15, ymax * 1.15)
+            else:
+                pad = 0.05 * (y_hi_arr.max() - y_lo_arr.min() or 1)
+                ylim = (y_lo_arr.min() - pad, y_hi_arr.max() + pad)
+
+            for ax, cl in zip(axes[:len(CELL_LINES)], CELL_LINES):
+                if ax.get_visible():
+                    ax.set_xlim(xlim)
+                    ax.set_ylim(ylim)
+
         htag     = f'_harm_{harmonize_strat}' if harmonize else '_perclass'
         cats_tag = 'simplified' if plot_cats is not None else 'all'
+        scale_tag = '_sharedscale' if shared_scale else ''
         fig.suptitle(
             f'Loop strength vs size — {title_tag}\n'
             f'one panel per cell line · {tag} · {cats_tag}',
-            # + (f' · shared edges ({harmonize_strat})' if harmonize else ''),
             fontsize=14, fontweight='bold')
         plt.tight_layout()
         out_path = OUT_DIR / \
-            f'loop_strength_by_cellline_{out_tag}_{tag}{htag}_{cats_tag}.svg'
+            f'loop_strength_by_cellline_{out_tag}_{tag}{htag}_{cats_tag}{scale_tag}.svg'
         plt.savefig(out_path, bbox_inches='tight')
         plt.close()
         print(f"Saved: {out_path}")
-
 
 # one panel per loop class, across cls
 def plot_layout2(df, all_classes, class_colors, name_col_fn,
@@ -523,18 +563,18 @@ plot_layout2(df, CLASSES, CLASS_COLORS, loop_name_col,
              'cluster', 'loop name (cluster annotation)',
              plot_cats=PLOT_CATEGORIES)     # ← None = all raw cluster classes
 
-df_manual = derive_manual_loop_class(df)
+# df_manual = derive_manual_loop_class(df)
 
-if df_manual is not None:
-    manual_name_col_fn = lambda cl: MANUAL_LOOP_NAME_COL_TEMPLATE.format(cl=cl)
+# if df_manual is not None:
+#     manual_name_col_fn = lambda cl: MANUAL_LOOP_NAME_COL_TEMPLATE.format(cl=cl)
 
-    # swap plot_cats=PLOT_CATEGORIES to plot_cats=None to toggle
-    plot_layout1(df_manual, MANUAL_CLASSES, CLASS_COLORS, manual_name_col_fn,
-                 'manual', 'loop name (manual annotation)',
-                 plot_cats=PLOT_CATEGORIES)  # ← None = all raw manual classes
+#     # swap plot_cats=PLOT_CATEGORIES to plot_cats=None to toggle
+#     plot_layout1(df_manual, MANUAL_CLASSES, CLASS_COLORS, manual_name_col_fn,
+#                  'manual', 'loop name (manual annotation)',
+#                  plot_cats=PLOT_CATEGORIES)  # ← None = all raw manual classes
 
-    plot_layout2(df_manual, MANUAL_CLASSES, CLASS_COLORS, manual_name_col_fn,
-                 'manual', 'loop name (manual annotation)',
-                 plot_cats=PLOT_CATEGORIES)  # ← None = all raw manual classes
+#     plot_layout2(df_manual, MANUAL_CLASSES, CLASS_COLORS, manual_name_col_fn,
+#                  'manual', 'loop name (manual annotation)',
+#                  plot_cats=PLOT_CATEGORIES)  # ← None = all raw manual classes
 
 print("\nDone. SVGs written to", OUT_DIR.resolve())

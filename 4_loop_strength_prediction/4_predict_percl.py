@@ -15,7 +15,7 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import r2_score
 
 # ---------------- basic config ----------------
-INPUT_FILE  = "loops/loop_df_reclustered.tsv"
+INPUT_FILE  = "loops/loop_df_reclustered_per_cl.tsv"
 OUTPUT_DIR  = "per_cl_reclustered"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

@@ -35,11 +35,19 @@ def add_excl_defs(df):
 
 merge_3kb = add_excl_defs(merge_3kb)
 
-anno_cols = ['is_only_CTCF', 'is_only_CRE', 'is_only_PRC_narrow', 'is_none']
+# anno_cols = ['is_only_CTCF', 'is_only_CRE', 'is_only_PRC_narrow', 'is_none']
+# anno_colors = {
+#     'is_only_CRE':  '#33BCEE',
+#     'is_only_CTCF': '#CC3412',
+#     'is_only_PRC_narrow': '#4EB265',
+#     'is_none': '#777777'
+# }
+
+anno_cols = ['is_CTCF', 'is_E', 'is_PRC_narrow', 'is_none']
 anno_colors = {
-    'is_only_CRE':  '#33BCEE',
-    'is_only_CTCF': '#CC3412',
-    'is_only_PRC_narrow': '#4EB265',
+    'is_E':  '#33BCEE',
+    'is_CTCF': '#CC3412',
+    'is_PRC_narrow': '#4EB265',
     'is_none': '#777777'
 }
 
