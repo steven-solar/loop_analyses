@@ -32,7 +32,7 @@ CLASS_COLORS = {
     "PRC-PRC":   "#4EB265",
 }
 
-SPLINE_DF  = 5
+SPLINE_DF  = 4
 N_PLS_COMP = 4
 MIN_N      = 50   # minimum points per (class, cell line) to fit
 
