@@ -24,6 +24,7 @@ from matplotlib.colors import LogNorm
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 from matplotlib.transforms import Bbox
 import cooler
+from cooltools.lib import plotting
 from coolbox.api import *
 from coolbox.utilities import GenomeRange
 from pygenometracks.tracks import BedTrack
@@ -70,9 +71,9 @@ MICROC_PARAMS = {
     "transform":   "log10",
     "depth_ratio": "full",
     "balance":     True,
-    "cmap":        "YlOrRd",
-    "max_value":   -1.5,
-    "min_value":   -3.1,
+    "cmap":        "fall",
+    "max_value":   -1,
+    "min_value":   -4,
     "fontsize":    18,
 }
 
@@ -122,6 +123,12 @@ MICROC_PARAMS = {
 # MICROC_PARAMS['max_value'] = -1.75
 # MICROC_PARAMS['min_value'] = -3.25
 
+REGION='chrX:57,880,000-58,180,000'
+OUT_PREFIX = 'zic3_chrX_57.88-58.18'
+MICROC_PARAMS['max_value'] = -1.25
+MICROC_PARAMS['min_value'] = -3.75
+SIGNALS = ['ATAC', 'K27ac', 'Ring1b', 'K27me3']
+
 # REGION='chr11:116,000,000-116,820,148'
 # OUT_PREFIX='Unk'
 
@@ -155,11 +162,11 @@ MICROC_PARAMS = {
 # MICROC_PARAMS['min_value'] = -3.1
 
 
-REGION = 'chr1:8,500,000-8,975,000 '
-OUT_PREFIX = 'Sntg1'
-SIGNALS = ['ATAC', 'K27ac', 'K4me1', 'K4me3', 'K9me2', 'K9me3', 'K36me2', 'K36me3']
-MICROC_PARAMS['max_value'] = -2.5
-MICROC_PARAMS['min_value'] = -3.75
+# REGION = 'chr1:8,500,000-8,975,000 '
+# OUT_PREFIX = 'Sntg1'
+# SIGNALS = ['ATAC', 'K27ac', 'K4me1', 'K4me3', 'K9me2', 'K9me3', 'K36me2', 'K36me3']
+# MICROC_PARAMS['max_value'] = -2.5
+# MICROC_PARAMS['min_value'] = -3.75
 
 EPIG_MAX = {
     "ATAC":   6,

@@ -1,5 +1,4 @@
 cluster	cluster_name_long	cluster_name_short	cluster_color	category_name	category_color
-
 1	CTCF (ESC, EpiLC)	CTCF	#DC050C	CTCF	#cc3412
 3	CTCF (d4c7PGCLC)	CTCF	#E65518	CTCF	#cc3412
 7	CTCF (GSC)	CTCF	#EE8026	CTCF	#cc3412
@@ -12,7 +11,7 @@ cluster	cluster_name_long	cluster_name_short	cluster_color	category_name	categor
 10	PRC_10	PRC	#90C987	PRC	#4EB265
 11	K27ac_K9_Bivalent (ESC, EpiLC)	Other	#CAE0AB	Bivalent CRE	#CAE0AB
 12	Cohesin-CRE	Other	#AE76A3	Cohesin CRE	#AA69FE
-0	Weak CRE/CTCF	Weak	#D9CCE3	Weak	#D9CCE3
+0	Mixed	Mixed	#D9CCE3	Weak	#D9CCE3
 13	Other	Other	#777777	Other	#777777
 14	Other	Other	#777777	Other	#777777
 15	Other	Other	#777777	Other	#777777

@@ -16,7 +16,7 @@ import matplotlib.patches as mpatches
 import seaborn as sns
 import pandas as pd 
 
-df = pd.read_csv('../3_anchor_clustering/clustering/anchors_3kb_labeled.tsv', sep='\t')
+df = pd.read_csv('../3_anchor_clustering/clustering_recluster_per_cellline/anchors_q0.01_3kb_all_celllines_pca_clustered_umap.tsv', sep='\t')
 
 def style_axes(ax):
     for spine in ax.spines.values():

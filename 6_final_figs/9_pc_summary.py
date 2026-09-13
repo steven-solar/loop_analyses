@@ -21,8 +21,51 @@ import itertools
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import matplotlib
 import matplotlib.pyplot as plt
 from scipy import stats
+
+matplotlib.use('Agg')
+plt.rcParams.update({
+    "text.usetex": False})
+plt.rcParams['svg.fonttype'] = 'none'
+plt.rc('pdf', fonttype=42)
+plt.rcParams["ps.useafm"] = True
+matplotlib.rcParams['path.simplify'] = False        # don't simplify vector paths
+matplotlib.rcParams['agg.path.chunksize'] = 0       # no chunking
+
+matplotlib.rcParams.update({
+    'font.size':     6,
+    'axes.linewidth': 0.25,
+    'axes.labelsize': 6,
+    'xtick.labelsize': 6,
+    'ytick.labelsize': 6,
+    'legend.fontsize': 6,
+    'svg.fonttype':  'none',       # keeps text as real text, not outlines, in Illustrator
+})
+
+import matplotlib.patches as mpatches
+
+# --- global rcParams so every text element and stroke matches your target ---
+PT_TO_IN = 1 / 72.0
+TARGET_WIDTH_PT = 150
+STROKE_PT = 0.25
+FONT_PT = 5
+
+plt.rcParams.update({
+    "font.size": FONT_PT,
+    "axes.titlesize": FONT_PT,
+    "axes.labelsize": FONT_PT,
+    "xtick.labelsize": FONT_PT,
+    "ytick.labelsize": FONT_PT,
+    "legend.fontsize": FONT_PT,
+    "axes.linewidth": STROKE_PT,
+    "xtick.major.width": STROKE_PT,
+    "ytick.major.width": STROKE_PT,
+    "xtick.major.size": 2,
+    "ytick.major.size": 2,
+    "svg.fonttype": "none",   # keep text as live/editable text in Illustrator, not outlines
+})
 
 # ----------------------------- config ------------------------------------
 CELL_LINES = ["ESC", "EpiLC", "d4c7PGCLC", "GSC"]
@@ -185,24 +228,103 @@ def compute_transition_distances(df, cell_lines=CELL_LINES, sides=SIDES, n_pcs=N
 
 
 # ------------------------------- plots --------------------------------------
-def plot_distance_violins(long_df, cell_lines=CELL_LINES, out_path=None):
+# def plot_distance_violins(long_df, cell_lines=CELL_LINES, out_path=None):
+#     order = [f"{a}->{b}" for a, b in zip(cell_lines[:-1], cell_lines[1:])]
+#     plot_df = long_df.dropna(subset=["distance"])
+#     fig, ax = plt.subplots(figsize=(1.6 * len(order) + 2, 5))
+#     sns.violinplot(data=plot_df, x="transition", y="distance", order=order, cut=0, inner="quartile", ax=ax)
+#     ax.set_xlabel("")
+#     ax.set_ylabel("Euclidean distance (PC1-4, both anchors combined)")
+#     ax.set_title("Loop displacement in PC space per cell-state transition")
+#     plt.tight_layout()
+#     if out_path:
+#         fig.savefig(out_path)
+#         print(f"[INFO] saved {out_path}")
+#     return fig
+
+def plot_distance_violins(long_df, cell_lines=CELL_LINES, out_path=None,
+                           whisker_tick_halfwidth=0.15):
     order = [f"{a}->{b}" for a, b in zip(cell_lines[:-1], cell_lines[1:])]
     plot_df = long_df.dropna(subset=["distance"])
 
     fig, ax = plt.subplots(figsize=(1.6 * len(order) + 2, 5))
     sns.violinplot(data=plot_df, x="transition", y="distance", order=order,
                    cut=0, inner="quartile", ax=ax)
-    sns.stripplot(data=plot_df, x="transition", y="distance", order=order,
-                   color="black", alpha=0.15, size=2, ax=ax)
+
+    # add whisker-position ticks (standard 1.5*IQR rule, clipped to data range)
+    # so you have a reference for where to draw box whiskers in Illustrator
+    for i, transition in enumerate(order):
+        vals = plot_df.loc[plot_df["transition"] == transition, "distance"].dropna()
+        if vals.empty:
+            continue
+        q1, q3 = np.percentile(vals, [25, 75])
+        iqr = q3 - q1
+        lo_fence, hi_fence = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+        whisker_lo = vals[vals >= lo_fence].min()
+        whisker_hi = vals[vals <= hi_fence].max()
+
+        ax.hlines([whisker_lo, whisker_hi],
+                  i - whisker_tick_halfwidth, i + whisker_tick_halfwidth,
+                  color="black", linewidth=1, zorder=5)
+
     ax.set_xlabel("")
     ax.set_ylabel("Euclidean distance (PC1-4, both anchors combined)")
     ax.set_title("Loop displacement in PC space per cell-state transition")
-    plt.tight_layout()
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
     if out_path:
-        fig.savefig(out_path, dpi=300)
+        fig.savefig(out_path)
         print(f"[INFO] saved {out_path}")
     return fig
 
+def plot_distance_histograms(long_df, cell_lines=CELL_LINES, out_path=None,
+                              n_bins=250, colors=None):
+    """
+    Overlapping step-histogram of per-loop transition distances (the same
+    'distance' column plot_distance_violins uses), one line per transition,
+    linear-spaced shared bins on x, raw loop counts on y.
+    """
+    order = [f"{a}->{b}" for a, b in zip(cell_lines[:-1], cell_lines[1:])]
+
+    vals_by_transition = {}
+    for transition in order:
+        v = long_df.loc[long_df["transition"] == transition, "distance"].to_numpy(dtype=float)
+        n_nan = np.isnan(v).sum()
+        if n_nan:
+            print(f"[WARN] {transition}: dropping {n_nan}/{len(v)} NaN distances "
+                  f"before binning.", file=sys.stderr)
+        vals_by_transition[transition] = v[np.isfinite(v)]
+
+    pooled = np.concatenate(list(vals_by_transition.values()))
+    if pooled.size == 0:
+        print("[WARN] plot_distance_histograms: no finite distances, skipping.",
+              file=sys.stderr)
+        return None
+    bins = np.linspace(pooled.min(), pooled.max(), n_bins + 1)
+
+    if colors is None:
+        colors = {order[i]: c for i, c in enumerate(["#1f77b4", "#ff7f0e", "#d62728"])}
+
+    fig, ax = plt.subplots(figsize=(6, 4))
+    for transition in order:
+        v = vals_by_transition[transition]
+        if v.size == 0:
+            continue
+        ax.hist(v, bins=bins, density=False, histtype="step",
+                linewidth=1.2, color=colors[transition], label=transition)
+
+    ax.set_xlabel("Euclidean distance (PC1-4, both anchors combined)")
+    ax.set_xlim(0, 10)
+    ax.set_ylabel("Count")
+    ax.set_title("Distribution of Loop Displacement per Cell-State Transition")
+    ax.legend(title="Transition", frameon=True, fontsize=6, title_fontsize=7)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+
+    if out_path:
+        fig.savefig(out_path)
+        print(f"[INFO] saved {out_path}")
+    return fig
 
 def plot_distance_vs_able(long_df, cell_lines=CELL_LINES, out_path=None, use_abs=False):
     if "able_diff" not in long_df.columns:
@@ -342,9 +464,10 @@ if __name__ == "__main__":
     long_df.to_csv(os.path.join(OUTPUT_DIR, "transition_distances_long.csv"), index=False)
     print("[INFO] wrote transition_distances_long.csv")
 
-    plot_distance_violins(long_df, out_path=os.path.join(OUTPUT_DIR, "transition_distance_violins.png"))
+    plot_distance_violins(long_df, out_path=os.path.join(OUTPUT_DIR, "transition_distance_violins.svg"))
+    plot_distance_histograms(long_df, out_path=os.path.join(OUTPUT_DIR, "transition_distance_histograms.svg"))
     if has_able:
-        plot_distance_vs_able(long_df, out_path=os.path.join(OUTPUT_DIR, "distance_vs_able_diff.png"))
+        plot_distance_vs_able(long_df, out_path=os.path.join(OUTPUT_DIR, "distance_vs_able_diff.svg"))
 
     traj = compute_mean_pc_trajectories(df)
     plot_mean_pc_trajectories(traj)
