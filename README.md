@@ -87,7 +87,7 @@ At a high level, the pipeline:
 | `2_epigenomics/` | Quantify epigenomic signal at loop anchors, z-score it, and classify each anchor as CTCF / CRE / PRC / none. |
 | `3_anchor_clustering/` | PCA + KNN clustering of anchors, UMAP visualization, cluster naming, overlap checks against the peak-based classification. Several of its plotting scripts are exploratory re-runs of plots that get regenerated (in final form) in `6_final_figs/` — see callout below. |
 | `4_loop_strength_prediction/` | Build the per-loop feature table and fit loop-strength prediction models (per cell line, per loop class). |
-| `5_view_examples/` | Spot-check individual loop calls against the Micro-C matrix. |
+| `5_view_examples/` | Spot-check individual loop calls against the Micro-C matrix. Can just run 3, 1 and 2 left for completeness. |
 | `6_final_figs/` | Final manuscript figure generation. Includes one UMAP script (`6_anchor_umap.py`) that is *not* in the paper — see callout below. |
 
 Scripts within a folder are numbered in the order they're meant to be run.
