@@ -1,3 +1,5 @@
+# conda activate coolbox
+
 """
 plot_hic_loops.py
 

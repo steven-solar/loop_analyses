@@ -1,3 +1,5 @@
+# conda activate coolbox
+
 import pandas as pd
 import importlib
 import sys
@@ -20,10 +22,6 @@ from anchor_sankey import plot_anchor_sankey
 
 CELL_LINES = ['ESC', 'EpiLC', 'd4c7PGCLC', 'GSC']
 
-# anchors_wide = pd.read_csv('../3_anchor_clustering/clustering/anchors_3kb_wide_labeled.tsv', sep='\t')
-# anchors_wide = pd.read_csv('../3_anchor_clustering/clustering_subcluster_c6/anchors_reclustered_wide.tsv', sep='\t')
-# anchors_wide = pd.read_csv('../3_anchor_clustering/clustering_recluster_gsc/anchors_recluster_gsc_wide.tsv', sep='\t')
-# anchors_wide = pd.read_csv('../3_anchor_clustering/clustering_subcluster_cre_prc/anchors_cre_prc_reclustered_wide.tsv', sep='\t')
 anchors_wide = pd.read_csv('../3_anchor_clustering/clustering_recluster_per_cellline/anchors_reclustered_per_cl_wide.tsv', sep='\t')
 
 names_cats_colors_df = pd.read_csv('../3_anchor_clustering/clustering/anchor_names_cats_colors.tsv', sep='\t')

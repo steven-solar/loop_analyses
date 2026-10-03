@@ -1,3 +1,5 @@
+# conda activate umap_env
+
 """
 Linear regression (sklearn) of each loop feature against AbLE_score,
 computed overall and per cell line, with scatter + fit-line plots.

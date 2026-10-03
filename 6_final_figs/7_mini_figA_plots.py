@@ -1,3 +1,6 @@
+
+# conda activate coolpuppy_env (or really most are fine)
+
 import pandas as pd
 import matplotlib.pyplot as plt
 

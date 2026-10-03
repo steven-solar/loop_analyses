@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# conda activate mustache
 
 DATA_DIR="../data"
 

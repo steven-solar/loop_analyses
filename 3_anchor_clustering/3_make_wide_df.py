@@ -1,10 +1,8 @@
+# conda activate umap_env
+
 import pandas as pd
 
 window='3kb'
-# anchors = pd.read_csv(f'clustering/anchors_q0.01_{window}_pca_clustered_umap.tsv', sep='\t')
-# anchors = pd.read_csv('clustering_subcluster_c6/anchors_reclustered.tsv', sep='\t')
-# anchors = pd.read_csv('clustering_recluster_gsc/anchors_recluster_gsc.tsv', sep='\t')
-# anchors = pd.read_csv('clustering_subcluster_cre_prc/anchors_cre_prc_reclustered.tsv', sep='\t')
 anchors = pd.read_csv('clustering_recluster_per_cellline/anchors_reclustered_per_cl.tsv', sep='\t')
 
 anchors['anchor_id_nocl'] = anchors['chrom'] + ':' + anchors['mid'].astype(str)

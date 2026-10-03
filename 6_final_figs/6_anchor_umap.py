@@ -1,3 +1,5 @@
+# conda activate umap_env
+
 import matplotlib
 matplotlib.use('Agg')
 matplotlib.rcParams.update({

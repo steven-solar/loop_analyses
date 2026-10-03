@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# conda activate umap_env
 
 import os
 import re

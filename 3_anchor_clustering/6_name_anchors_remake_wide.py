@@ -1,3 +1,5 @@
+# conda activate umap_env (or any)
+
 import pandas as pd
 
 def attach_cluster_metadata(anchor_df, cluster_meta_path):

@@ -16,4 +16,5 @@
 *.pyc
 *pad10000
 *chromsizes
-_*
+_*.ipynb
+

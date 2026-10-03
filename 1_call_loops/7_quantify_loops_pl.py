@@ -1,3 +1,5 @@
+# conda activate loop_quant_env
+
 import numpy as np
 import pandas as pd
 import cooler

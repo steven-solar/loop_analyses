@@ -1,3 +1,6 @@
+# conda activate coolbox
+# this is a very hungry script for cpu/ram, I typically would limit cpu with taskset
+
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -13,7 +16,7 @@ import sys
 sys.path.append('/mnt/md0/sjsolar/loop_pred/loop_analyses/0_helper_scripts')  # wherever you save it
 from apa_clusters import run_apa_pipeline
 from cpu_limit import limit_cpus
-limit_cpus(n=12, start=24)
+limit_cpus(n=12)
 CELL_LINES = ['ESC', 'EpiLC', 'd4c7PGCLC', 'GSC']
 
 # loop_df = pd.read_csv('../4_loop_strength_prediction/loops/loop_df_3kb.tsv', sep='\t')

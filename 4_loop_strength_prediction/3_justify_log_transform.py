@@ -1,3 +1,5 @@
+# conda activate umap_env (or most are fine)
+
 import os
 import numpy as np
 import pandas as pd

@@ -1,4 +1,5 @@
 # conda activate coolbox
+# this is a very hungry script for cpu/ram, I typically would limit cpu with taskset
 
 import sys
 sys.path.append('/mnt/md0/sjsolar/loop_pred/loop_analyses/0_helper_scripts')

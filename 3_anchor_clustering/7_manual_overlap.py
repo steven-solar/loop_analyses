@@ -1,3 +1,5 @@
+# conda activate umap_env (or any)
+
 '''
 Overlap my clusters with peak based defs, have run this a few times on diff clustering because of PRC-CRE issue, so a few commented out files here
 '''
@@ -15,10 +17,6 @@ CLUSTER_PATH = 'clustering_recluster_per_cellline'
 
 ANN_PATH = '../2_epigenomics/anchor_epigenomics'
 
-# cluster_3kb = pd.read_csv(f'{CLUSTER_PATH}/anchors_3kb_labeled.tsv', sep='\t')
-# cluster_3kb = pd.read_csv(f'{CLUSTER_PATH}/anchors_reclustered.tsv', sep='\t')
-# cluster_3kb = pd.read_csv(f'{CLUSTER_PATH}/anchors_recluster_gsc.tsv', sep='\t')
-# cluster_3kb = pd.read_csv(f'{CLUSTER_PATH}/anchors_cre_prc_reclustered.tsv', sep='\t')
 cluster_3kb = pd.read_csv(f'{CLUSTER_PATH}/anchors_reclustered_per_cl.tsv', sep='\t')
 
 ann_3kb = pd.read_csv(f'{ANN_PATH}/anchors_q0.01_3kb_annotated.p10.tsv', sep='\t')

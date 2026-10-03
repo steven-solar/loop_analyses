@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# conda activate loop_quant_env
 
 quantify_loops_pl() {
     cell_line=$1
