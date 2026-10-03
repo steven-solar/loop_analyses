@@ -1,4 +1,4 @@
-# conda activate coolpuppy_env
+# conda activate coolpuppy_env (if you want to do O/E)
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,9 +26,7 @@ from coolpuppy.lib import numutils
 OUTDIR = 'loop_violins/recluster_cre_prc'
 os.makedirs(OUTDIR, exist_ok=True)
 
-# loop_df = pd.read_csv('../4_loop_strength_prediction/loops/loop_df_3kb.tsv', sep='\t')
-loop_df = pd.read_csv('../4_loop_strength_prediction/loops/loop_df_cre_prc_reclustered.tsv', sep='\t')
-# loop_df = pd.read_csv('../4_loop_strength_prediction/loops/loop_df_reclustered_per_cl.tsv', sep='\t')
+loop_df = pd.read_csv('../4_loop_strength_prediction/loops/loop_df_reclustered_per_cl.tsv', sep='\t')
 color_tsv = '../4_loop_strength_prediction/loops/loop_colors.tsv'
 
 
