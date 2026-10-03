@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-cluster_heatmap.py
+heatmap.py
 -------------------
 Generic, re-runnable heatmap utilities.
 

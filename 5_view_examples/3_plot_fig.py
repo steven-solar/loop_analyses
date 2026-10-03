@@ -1,16 +1,11 @@
 # conda activate coolbox
 
 """
-plot_hic_loops.py
+3_plot_fig.py
 
 Per-cell-line Hi-C / Micro-C heatmaps with BigWig and BED tracks.
-Each cell line uses its own bigwig y-scale, loaded from a precomputed
-per_cell_line_scales.tsv (cell_line, mark, mean, std, max_value columns --
-see compute_scales_from_loops.py). Supports off-diagonal matrix sections
-and split-diagonal (top/bottom triangle) comparisons between two cell
-lines, the latter styled identically to the plain (bigwig-free) matrix
+Supports off-diagonal matrix sections and split-diagonal (top/bottom triangle) comparisons between two cell lines, the latter styled identically to the plain (bigwig-free) matrix
 plots such as the merged heatmap.
-Hi-C matrix exports are pixel-perfect squares.
 
 Also supports a loop-centric summary panel (see LOOP-CENTRIC PANEL
 section near the bottom): given a loop_id, produces the split-diagonal

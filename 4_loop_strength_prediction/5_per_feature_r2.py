@@ -5,7 +5,7 @@ Linear regression (sklearn) of each loop feature against AbLE_score,
 computed overall and per cell line, with scatter + fit-line plots.
 
 Usage:
-    python loop_feature_regression_by_cellline.py path/to/loops.csv
+    python 5_per_feature_r2.py path/to/loops.csv
 	
 
 Expects a table (CSV/TSV) with at least these columns:

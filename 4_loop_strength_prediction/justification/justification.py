@@ -6,7 +6,7 @@ in-sample R2 in the title) and a per-loop-class R2 bar chart segmented by
 CTCF-CTCF / CRE-CRE / PRC-PRC.
 
 Usage:
-    python ridge_loop_regression.py loops.tsv --outdir figs
+    python justification.py path/to/loops.tsv --outdir figs
 
 Assumes a tab-separated table with the columns from make_input_filt.py output:
 AbLE_score, size, loop_name (values like "CTCF-CTCF & ..." or exactly

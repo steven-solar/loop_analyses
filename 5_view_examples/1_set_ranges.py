@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# conda activate coolbox
+
 """
-compute_scales_from_loops.py
+Originally used this script to derive genome-browser track y-axis scales, but ultimately ended up setting based on visual inspection.
 
 Derive genome-browser track y-axis scales from per-cell-line loop dataframes,
 each with anchor1_<mark> / anchor2_<mark> raw signal columns (and matching
