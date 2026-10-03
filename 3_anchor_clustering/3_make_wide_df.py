@@ -1,4 +1,4 @@
-# conda activate umap_env
+# conda activate umap_env (but any are fine)
 
 import pandas as pd
 
